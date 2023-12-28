@@ -97,7 +97,7 @@ fn edit_proposal(key: u64, proposal: CreateProposal) -> Result<(), VoteError> {
         let old_proposal:Proposal;
 
         match old_proposal_opt {
-            Some(old_proposal) => old_proposal = value,
+            Some(value) => old_proposal = value,
             None => return Err(VoteError::NoSuchProposal),
         }
 
@@ -105,7 +105,7 @@ fn edit_proposal(key: u64, proposal: CreateProposal) -> Result<(), VoteError> {
             return Err(VoteError::AccessRejected)
         }
     
-        let value = Proposal{
+        let value = Proposal {
             description = propossal.description,
             approve: old_proposal.approve,
             reject: old_proposal.reject,
@@ -115,7 +115,8 @@ fn edit_proposal(key: u64, proposal: CreateProposal) -> Result<(), VoteError> {
             owner: old_proposal.owner,
 
         };
-        let res: p.borrow_mut().insert(key, value)
+
+        let res = PROPOSAL_MAP.with(|p|  p.borrow_mut().insert(key, value));
 
 
         match result{
@@ -129,6 +130,8 @@ fn edit_proposal(key: u64, proposal: CreateProposal) -> Result<(), VoteError> {
 #[ic_cdk::update]
 fn end_proposal(key: u64) -> Result<(), VoteError> {
     PROPOSAL_MAP.with(|p| {
+
+        
         let mut old_proposal_opt = p.borrow().get(&key);
         let mut old_proposal:Proposal;
 
